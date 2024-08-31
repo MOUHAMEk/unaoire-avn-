@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MArisk - Lancer l'avancement des travaux</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Style global */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        /* En-tête (Header) */
+        header {
+            background-color: #2609cd;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 24px;
+        }
+
+        /* Corps principal (Body) */
+        main {
+            padding: 20px;
+            background-color: #ddd;
+        }
+
+        .section-box {
+            background-color: white;
+            padding: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        select, button, input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .progress {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .progress input[type="radio"] {
+            display: none;
+        }
+
+        .progress label {
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            width: 45%;
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        .progress .pas-encore { background-color: black; }
+        .progress .ferraille { background-color: orange; }
+        .progress .coffre { background-color: #FF6347; }
+        .progress .coule { background-color: #8B0000; }
+
+        /* Pied de page (Footer) */
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+</head>
+<body>
+
+<header>
+    <div>MArisk</div>
+    <div>Avancement des Travaux</div>
+</header>
+
+<main>
+    <div class="section-box">
+        <h1>Lancer l'avancement des travaux</h1>
+        <select id="etage" onchange="selectEtage()">
+            <option value="">Sélectionner un étage</option>
+            <option value="RDC">RDC</option>
+            <option value="R+1">R+1</option>
+            <option value="R+2">R+2</option>
+            <option value="R+3">R+3</option>
+            <option value="R+4">R+4</option>
+        </select>
+
+        <div id="elementSection" style="display:none;">
+            <select id="element" onchange="selectElement()">
+                <option value="">Sélectionner un élément</option>
+                <option value="Poteau">Poteau</option>
+                <option value="Poutre">Poutre</option>
+                <option value="Plancher">Plancher</option>
+                <option value="Escalier">Escalier</option>
+                <option value="Ascenseur">Ascenseur</option>
+            </select>
+        </div>
+
+        <div id="formSection" style="display:none;">
+            <input type="text" id="nomElement" placeholder="Nom de l'élément" />
+            <input type="text" id="sectionElement" placeholder="Section" />
+            <input type="text" id="ferraillageElement" placeholder="Ferraillage" />
+            <div class="progress">
+                <input type="radio" id="pasEncore" name="avancement" value="Pas encore" checked>
+                <label for="pasEncore" class="pas-encore">Pas encore</label>
+                <input type="radio" id="ferraille" name="avancement" value="Ferraillé">
+                <label for="ferraille" class="ferraille">Ferraillé (25%)</label>
+                <input type="radio" id="coffre" name="avancement" value="Coffré">
+                <label for="coffre" class="coffre">Coffré (50%)</label>
+                <input type="radio" id="coule" name="avancement" value="Coulé">
+                <label for="coule" class="coule">Coulé (100%)</label>
+            </div>
+            <button onclick="ajouterLigne()">Ajouter un élément</button>
+        </div>
+
+        <div id="tableSection" style="display:none;">
+            <table id="elementTable">
+                <thead>
+                    <tr>
+                        <th>Nom de l'élément</th>
+                        <th>Section</th>
+                        <th>Ferraillage</th>
+                        <th>Avancement</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Contenu dynamique sera ajouté ici -->
+                </tbody>
+            </table>
+            <button onclick="mettreAJour()">Actualiser le tableau et envoyer</button>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="contact">
+        <p>© 2024 Suivi des Travaux - MArisk</p>
+    </div>
+</footer>
+
+<script>
+    // Configuration Firebase
+    var firebaseConfig = {
+        apiKey: "API_KEY",
+        authDomain: "suivi-49954.firebaseapp.com",
+        databaseURL: "https://suivi-49954-default-rtdb.firebaseio.com",
+        projectId: "suivi-49954",
+        storageBucket: "suivi-49954.appspot.com",
+        messagingSenderId: "141836603566",
+        appId: "1:141836603566:web:aaff934468238d958cdd3f",
+        measurementId: "G-3CMYEPPYK8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
+
+    let selectedEtage = '';
+    let selectedElement = '';
+    let editingElement = null;
+
+    function selectEtage() {
+        selectedEtage = document.getElementById('etage').value;
+        if (selectedEtage) {
+            document.getElementById('elementSection').style.display = 'block';
+        }
+    }
+
+    function selectElement() {
+        selectedElement = document.getElementById('element').value;
+        if (selectedElement && selectedEtage) {
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('tableSection').style.display = 'block';
+            chargerElements(selectedEtage, selectedElement);
+        }
+    }
+
+    function chargerElements(etage, element) {
+        const tbody = document.getElementById('elementTable').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+
+        const ref = database.ref('suivi/' + etage + '/' + element);
+        ref.once('value', (snapshot) => {
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
+                ajouterLigneAuTableau(data.nom, data.section, data.ferraillage, data.avancement, childSnapshot.key);
+            });
+        });
+    }
+
+    function ajouterLigne() {
+        const nom = document.getElementById('nomElement').value;
+        const section = document.getElementById('sectionElement').value;
+        const ferraillage = document.getElementById('ferraillageElement').value;
+        const avancement = document.querySelector('input[name="avancement"]:checked').value;
+
+        if (editingElement) {
+            mettreAJourElement(editingElement, nom, section, ferraillage, avancement);
+            editingElement = null;
+        } else {
+            const ref = database.ref('suivi/' + selectedEtage + '/' + selectedElement);
+            const newElementRef = ref.push();
+            newElementRef.set({
+                nom: nom,
+                section: section,
+                ferraillage: ferraillage,
+                avancement: avancement
+            });
+        }
+
+        ajouterLigneAuTableau(nom, section, ferraillage, avancement);
+    }
+
+    function ajouterLigneAuTableau(nom, section, ferraillage, avancement, key = null) {
+        const tbody = document.getElementById('elementTable').getElementsByTagName('tbody')[0];
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-key', key);
+        tr.innerHTML = `
+            <td>${nom}</td>
+            <td>${section}</td>
+            <td>${ferraillage}</td>
+            <td>${avancement}</td>
+            <td>
+                <button onclick="modifierElement(this)">Modifier</button>
+                <button onclick="supprimerElement(this)">Supprimer</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function modifierElement(button) {
+        const tr = button.closest('tr');
+        const key = tr.getAttribute('data-key');
+        const nom = tr.children[0].innerText;
+        const section = tr.children[1].innerText;
+        const ferraillage = tr.children[2].innerText;
+        const avancement = tr.children[3].innerText;
+
+        editingElement = key;
+
+        document.getElementById('nomElement').value = nom;
+        document.getElementById('sectionElement').value = section;
+        document.getElementById('ferraillageElement').value = ferraillage;
+        document.querySelector(`input[name="avancement"][value="${avancement}"]`).checked = true;
+    }
+
+    function supprimerElement(button) {
+        const tr = button.closest('tr');
+        const key = tr.getAttribute('data-key');
+        tr.remove();
+
+        if (key) {
+            const ref = database.ref('suivi/' + selectedEtage + '/' + selectedElement + '/' + key);
+            ref.remove();
+        }
+    }
+
+    function mettreAJourElement(key, nom, section, ferraillage, avancement) {
+        const ref = database.ref('suivi/' + selectedEtage + '/' + selectedElement + '/' + key);
+        ref.update({
+            nom: nom,
+            section: section,
+            ferraillage: ferraillage,
+            avancement: avancement
+        });
+        document.querySelector(`tr[data-key="${key}"]`).innerHTML = `
+            <td>${nom}</td>
+            <td>${section}</td>
+            <td>${ferraillage}</td>
+            <td>${avancement}</td>
+            <td>
+                <button onclick="modifierElement(this)">Modifier</button>
+                <button onclick="supprimerElement(this)">Supprimer</button>
+            </td>
+        `;
+    }
+
+    function mettreAJour() {
+        chargerElements(selectedEtage, selectedElement);
+        alert('Tableau mis à jour et données envoyées.');
+    }
+</script>
+</body>
+</html>
